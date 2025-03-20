@@ -53,86 +53,62 @@
                         iconAnchor: [15, 30],
                         popupAnchor: [0, -30]
                     });
-                case 'Purus':
-                    return L.icon({
-                        iconUrl: 'https://github.com/estatisticadefesacivil/mapa_congepdec/blob/main/purus.png?raw=true',
-                        iconSize: [25, 30],
-                        iconAnchor: [15, 30],
-                        popupAnchor: [0, -30]
-                    });
-                case 'Alto Solimões':
-                    return L.icon({
-                        iconUrl: 'https://github.com/estatisticadefesacivil/mapa_congepdec/blob/main/alto_solimoes.png?raw=true',
-                        iconSize: [25, 30],
-                        iconAnchor: [15, 30],
-                        popupAnchor: [0, -30]
-                    });
-                case 'Baixo Amazonas':
-                    return L.icon({
-                        iconUrl: 'https://github.com/estatisticadefesacivil/mapa_congepdec/blob/main/baixo_amazonas.png?raw=true',
-                        iconSize: [25, 30],
-                        iconAnchor: [15, 30],
-                        popupAnchor: [0, -30]
-                    });
-                case 'Juruá':
-                    return L.icon({
-                        iconUrl: 'https://github.com/estatisticadefesacivil/mapa_congepdec/blob/main/jurua.png?raw=true',
-                        iconSize: [25, 30],
-                        iconAnchor: [15, 30],
-                        popupAnchor: [0, -30]
-                    });
-                case 'Baixo Solimões':
-                    return L.icon({
-                        iconUrl: 'https://github.com/estatisticadefesacivil/mapa_congepdec/blob/main/baixo_solimoes.png?raw=true',
-                        iconSize: [25, 30],
-                        iconAnchor: [15, 30],
-                        popupAnchor: [0, -30]
-                    });
-                case 'Médio Amazonas':
-                    return L.icon({
-                        iconUrl: 'https://github.com/estatisticadefesacivil/mapa_congepdec/blob/main/medio_amazonas.png?raw=true',
-                        iconSize: [25, 30],
-                        iconAnchor: [15, 30],
-                        popupAnchor: [0, -30]
-                    });
-                case 'Médio Solimões':
-                    return L.icon({
-                        iconUrl: 'https://github.com/estatisticadefesacivil/mapa_congepdec/blob/main/medio_solimoes.png?raw=true',
-                        iconSize: [25, 30],
-                        iconAnchor: [15, 30],
-                        popupAnchor: [0, -30]
-                    });
+                // Adicione os outros casos de acordo com os nomes da sua planilha
             }
         }
 
-        // Exemplo de tabela que você pode usar para adicionar marcadores. Substitua com seus dados reais
-        var tabela = [
-            {NomeCalha: 'Negro', Latitude: -3.465, Longitude: -60.158, Municipio: 'Manaus', Responsavel: 'Pessoa 1'},
-            {NomeCalha: 'Madeira', Latitude: -4.595, Longitude: -60.357, Municipio: 'Porto Velho', Responsavel: 'Pessoa 2'}
-        ];
+        // Função para carregar dados do Google Sheets usando a API
+        function loadGoogleSheetData() {
+            var sheetUrl = 'https://sheets.googleapis.com/v4/spreadsheets/12Y5lEqswOj1GBxHchN93Ci20tSORnIIX7-sE7MGmqiE/values/Sheet1?key=AIzaSyCK9OucWSLHN3x7XZ5NzUfe290iXu229Z8';
+            
+            fetch(sheetUrl)
+                .then(response => response.json())
+                .then(data => {
+                    // Processa os dados
+                    var rows = data.values;
+                    var markersData = [];
+                    
+                    // Salta a primeira linha (cabeçalho) e processa as demais
+                    for (var i = 1; i < rows.length; i++) {
+                        var row = rows[i];
+                        if (row.length > 4) {
+                            markersData.push({
+                                NomeCalha: row[0],
+                                Latitude_2: parseFloat(row[1]),
+                                Longitude_2: parseFloat(row[2]),
+                                Municipio: row[3],
+                                Responsavel: row[4]
+                            });
+                        }
+                    }
 
-        // Adiciona marcadores para cada linha na tabela com tooltip
-        tabela.forEach(function(row) {
-            var markerIcon = getMarkerIcon(row.NomeCalha);
-            var marker = L.marker([row.Latitude, row.Longitude], { icon: markerIcon }).addTo(map);
-            marker.bindPopup('<b>Nome da Calha:</b> ' + row.NomeCalha + '<br><b>Município:</b> ' + row.Municipio + '<br><b>Responsável:</b> ' + row.Responsavel);
-
-            marker.on('mouseover', function() {
-                this.bindTooltip('<b>Nome da Calha:</b> ' + row.NomeCalha + '<br><b>Município:</b> ' + row.Municipio + '<br><b>Responsável:</b> ' + row.Responsavel).openTooltip();
-            });
-
-            marker.on('mouseout', function() {
-                this.closeTooltip();
-            });
-        });
-
-        // Força o recálculo do tamanho do mapa após 1 segundo
-        window.onload = function() {
-            setTimeout(function() {
-                map.invalidateSize();  // Força o recálculo do tamanho do mapa
-            }, 1000);  // Atraso de 1 segundo (ajuste conforme necessário)
+                    // Adiciona os marcadores no mapa
+                    addMarkers(markersData);
+                })
+                .catch(error => console.error('Erro ao carregar dados:', error));
         }
+
+        // Função para adicionar os marcadores no mapa
+        function addMarkers(data) {
+            data.forEach(function(row) {
+                var markerIcon = getMarkerIcon(row.NomeCalha);
+                var marker = L.marker([row.Latitude_2, row.Longitude_2], { icon: markerIcon }).addTo(map);
+                marker.bindPopup('<b>Nome da Calha:</b> ' + row.NomeCalha + '<br><b>Município:</b> ' + row.Municipio + '<br><b>Responsável:</b> ' + row.Responsavel);
+
+                marker.on('mouseover', function() {
+                    this.bindTooltip('<b>Nome da Calha:</b> ' + row.NomeCalha + '<br><b>Município:</b> ' + row.Municipio + '<br><b>Responsável:</b> ' + row.Responsavel).openTooltip();
+                });
+
+                marker.on('mouseout', function() {
+                    this.closeTooltip();
+                });
+            });
+        }
+
+        // Carregar dados do Google Sheets ao carregar a página
+        window.onload = function() {
+            loadGoogleSheetData();
+        };
     </script>
 </body>
 </html>
-
