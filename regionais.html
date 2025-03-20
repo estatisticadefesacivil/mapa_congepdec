@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa com Leaflet</title>
+    <style>
+        #map {
+            width: 100%; /* Ajuste a largura para algo mais adequado */
+            height: 850px; /* Altura do mapa */
+            min-height: 400px; /* Garantir uma altura mínima */
+        }
+
+        /* Esconde o controle de zoom do Leaflet */
+        .leaflet-control-zoom {
+            display: none !important;
+        }
+    </style>
+    <!-- Link do CSS do Leaflet -->
+    <link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css' 
+        integrity='sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=' crossorigin='' />
+</head>
+<body>
+    <div id='map'></div>
+
+    <!-- Link do JS do Leaflet -->
+    <script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js' integrity='sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=' crossorigin=''></script>
+    
+    <script>
+        // Inicializa o mapa com a posição centralizada no Amazonas (ajustado para zoom de 6.5)
+        var map = L.map('map').setView([-4.545432509449443, -62.999844519322146], 6.5);
+
+        // Recalcular o tamanho do mapa após a inicialização
+        map.invalidateSize();  // Isso ajuda a corrigir problemas de exibição no Power BI
+
+        // Adiciona o tile layer do OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        // Função para determinar o ícone com base no Nome da Calha
+        function getMarkerIcon(nomeCalha) {
+            switch(nomeCalha) {
+                case 'Negro':
+                    return L.icon({
+                        iconUrl: 'https://github.com/estatisticadefesacivil/mapa_congepdec/blob/main/negro.png?raw=true', 
+                        iconSize: [25, 30], 
+                        iconAnchor: [15, 30], 
+                        popupAnchor: [0, -30]
+                    });
+                case 'Madeira':
+                    return L.icon({
+                        iconUrl: 'https://github.com/estatisticadefesacivil/mapa_congepdec/blob/main/madeira.png?raw=true',
+                        iconSize: [25, 30],
+                        iconAnchor: [15, 30],
+                        popupAnchor: [0, -30]
+                    });
+                case 'Purus':
+                    return L.icon({
+                        iconUrl: 'https://github.com/estatisticadefesacivil/mapa_congepdec/blob/main/purus.png?raw=true',
+                        iconSize: [25, 30],
+                        iconAnchor: [15, 30],
+                        popupAnchor: [0, -30]
+                    });
+                case 'Alto Solimões':
+                    return L.icon({
+                        iconUrl: 'https://github.com/estatisticadefesacivil/mapa_congepdec/blob/main/alto_solimoes.png?raw=true',
+                        iconSize: [25, 30],
+                        iconAnchor: [15, 30],
+                        popupAnchor: [0, -30]
+                    });
+                case 'Baixo Amazonas':
+                    return L.icon({
+                        iconUrl: 'https://github.com/estatisticadefesacivil/mapa_congepdec/blob/main/baixo_amazonas.png?raw=true',
+                        iconSize: [25, 30],
+                        iconAnchor: [15, 30],
+                        popupAnchor: [0, -30]
+                    });
+                case 'Juruá':
+                    return L.icon({
+                        iconUrl: 'https://github.com/estatisticadefesacivil/mapa_congepdec/blob/main/jurua.png?raw=true',
+                        iconSize: [25, 30],
+                        iconAnchor: [15, 30],
+                        popupAnchor: [0, -30]
+                    });
+                case 'Baixo Solimões':
+                    return L.icon({
+                        iconUrl: 'https://github.com/estatisticadefesacivil/mapa_congepdec/blob/main/baixo_solimoes.png?raw=true',
+                        iconSize: [25, 30],
+                        iconAnchor: [15, 30],
+                        popupAnchor: [0, -30]
+                    });
+                case 'Médio Amazonas':
+                    return L.icon({
+                        iconUrl: 'https://github.com/estatisticadefesacivil/mapa_congepdec/blob/main/medio_amazonas.png?raw=true',
+                        iconSize: [25, 30],
+                        iconAnchor: [15, 30],
+                        popupAnchor: [0, -30]
+                    });
+                case 'Médio Solimões':
+                    return L.icon({
+                        iconUrl: 'https://github.com/estatisticadefesacivil/mapa_congepdec/blob/main/medio_solimoes.png?raw=true',
+                        iconSize: [25, 30],
+                        iconAnchor: [15, 30],
+                        popupAnchor: [0, -30]
+                    });
+            }
+        }
+
+        // Exemplo de tabela que você pode usar para adicionar marcadores. Substitua com seus dados reais
+        var tabela = [
+            {NomeCalha: 'Negro', Latitude: -3.465, Longitude: -60.158, Municipio: 'Manaus', Responsavel: 'Pessoa 1'},
+            {NomeCalha: 'Madeira', Latitude: -4.595, Longitude: -60.357, Municipio: 'Porto Velho', Responsavel: 'Pessoa 2'}
+        ];
+
+        // Adiciona marcadores para cada linha na tabela com tooltip
+        tabela.forEach(function(row) {
+            var markerIcon = getMarkerIcon(row.NomeCalha);
+            var marker = L.marker([row.Latitude, row.Longitude], { icon: markerIcon }).addTo(map);
+            marker.bindPopup('<b>Nome da Calha:</b> ' + row.NomeCalha + '<br><b>Município:</b> ' + row.Municipio + '<br><b>Responsável:</b> ' + row.Responsavel);
+
+            marker.on('mouseover', function() {
+                this.bindTooltip('<b>Nome da Calha:</b> ' + row.NomeCalha + '<br><b>Município:</b> ' + row.Municipio + '<br><b>Responsável:</b> ' + row.Responsavel).openTooltip();
+            });
+
+            marker.on('mouseout', function() {
+                this.closeTooltip();
+            });
+        });
+
+        // Força o recálculo do tamanho do mapa após 1 segundo
+        window.onload = function() {
+            setTimeout(function() {
+                map.invalidateSize();  // Força o recálculo do tamanho do mapa
+            }, 1000);  // Atraso de 1 segundo (ajuste conforme necessário)
+        }
+    </script>
+</body>
+</html>
+
